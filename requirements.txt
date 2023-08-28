@@ -3,3 +3,4 @@ pytz==2018.5
 python-dotenv
 psycopg2-binary
 djangorestframework
+requests

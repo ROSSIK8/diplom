@@ -83,7 +83,7 @@ class User(AbstractUser):
 class Shop(models.Model):
     name = models.CharField(max_length=256, verbose_name='Название')
     url = models.URLField(verbose_name='Ссылка', null=True, blank=True)
-    owner = models.OneToOneField(User, verbose_name='Пользователь', related_name='shops', on_delete=models.CASCADE, blank=True, null=True)
+    owner = models.ForeignKey(User, verbose_name='Пользователь', related_name='shops', on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Магазин'
@@ -131,7 +131,6 @@ class ProductInfo(models.Model):
         verbose_name_plural = 'Список информаций о продуктах'
 
     def __str__(self):
-        # return f'Продукт={self.product} Магазин={self.shop} Кол-во={self.quantity} Цена={self.price} Рек. роз. цена={self.price_rrc}'
         return self.product.name
 
 
