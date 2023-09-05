@@ -1,43 +1,54 @@
-from django.shortcuts import render
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView, ListAPIView
-from .serializers import UserSerializer, ShopSerializer, ShopDetailSerializer
+from rest_framework.views import APIView
+from .serializers import UserSerializer
 from rest_framework.response import Response
-from .models import User, Shop, Product
+from rest_framework import status
+from django.conf import settings
+from django.core.mail import send_mail
+import random
 
 
-class UsersView(ListCreateAPIView):
-    queryset = User.objects.all()
+class RegisterView(APIView):
     serializer_class = UserSerializer
-
-
-class UserDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class ShopsView(ListAPIView):
-    queryset = Shop.objects.all()
-    serializer_class = ShopSerializer
 
     def post(self, request):
-        review = ShopSerializer(data=request.data)
-        if review.is_valid():
-            review.save()
+        serializer = UserSerializer(data=request.data)
 
-        return Response({'status': 'OK'})
-
-
-class ShopDetailView(RetrieveAPIView):
-    queryset = Shop.objects.all()
-    serializer_class = ShopDetailSerializer
-
-    def patch(self, request, pk):
-        shop = Shop.objects.get(pk=pk)
-        serializer = ShopDetailSerializer(shop, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            code = random.randint(111111, 999999)
+            send_mail('Код подтверждения', f'{code}', settings.EMAIL_HOST_USER, [request.data['email']])
+            confirmation_code = input('Введите код подтверждения из письма: ')
+            if confirmation_code == str(code):
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            while confirmation_code != str(code):
+                confirmation_code = input('Введённый код не верный, повторите попытку: ')
+                if confirmation_code == str(code):
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# class UsersView(ListCreateAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
+#
+#
+# class UserDetailView(RetrieveUpdateDestroyAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
+#
+#
+# class ShopsView(ListCreateAPIView):
+#     queryset = Shop.objects.all()
+#     serializer_class = ShopSerializer
+#
+#
+# class ShopDetailView(RetrieveUpdateDestroyAPIView):
+#     queryset = Shop.objects.all()
+#     serializer_class = ShopDetailSerializer
+
 
 
 

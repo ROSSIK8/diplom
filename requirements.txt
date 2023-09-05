@@ -1,6 +1,9 @@
-Django==2.2.16
+Django
 pytz==2018.5
 python-dotenv
 psycopg2-binary
 djangorestframework
 requests
+django-rest-auth
+django-allauth
+django_rest_passwordreset
