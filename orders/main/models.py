@@ -63,9 +63,6 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    """
-    Стандартная модель пользователей
-    """
     REQUIRED_FIELDS = []
     objects = UserManager()
     USERNAME_FIELD = 'email'
@@ -95,9 +92,7 @@ class User(AbstractUser):
     type = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE_CHOICES, max_length=8, default='buyer')
 
     def __str__(self):
-        return f'{self.username}'
-
-
+        return self.username
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -137,6 +132,11 @@ class Category(models.Model):
         return self.name
 
 
+class ShopCategory(models.Model):
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+
 class Product(models.Model):
     name = models.CharField(max_length=80, verbose_name='Название')
     category = models.ForeignKey(Category, verbose_name='Категория', related_name='products', blank=True,
@@ -170,32 +170,32 @@ class ProductInfo(models.Model):
         ]
 
 
-class Parameter(models.Model):
-    name = models.CharField(max_length=40, verbose_name='Название')
-
-    class Meta:
-        verbose_name = 'Имя параметра'
-        verbose_name_plural = "Список имен параметров"
-        ordering = ('-name',)
-
-    def __str__(self):
-        return self.name
-
-
-class ProductParameter(models.Model):
-    product_info = models.ForeignKey(ProductInfo, verbose_name='Информация о продукте',
-                                     related_name='product_parameters', blank=True,
-                                     on_delete=models.CASCADE)
-    parameter = models.ForeignKey(Parameter, verbose_name='Параметр', related_name='product_parameters', blank=True,
-                                  on_delete=models.CASCADE)
-    value = models.CharField(verbose_name='Значение', max_length=100)
-
-    class Meta:
-        verbose_name = 'Параметр'
-        verbose_name_plural = "Список параметров"
-        constraints = [
-            models.UniqueConstraint(fields=['product_info', 'parameter'], name='unique_product_parameter'),
-        ]
+# class Parameter(models.Model):
+#     name = models.CharField(max_length=40, verbose_name='Название')
+#
+#     class Meta:
+#         verbose_name = 'Имя параметра'
+#         verbose_name_plural = "Список имен параметров"
+#         ordering = ('-name',)
+#
+#     def __str__(self):
+#         return self.name
+#
+#
+# class ProductParameter(models.Model):
+#     product_info = models.ForeignKey(ProductInfo, verbose_name='Информация о продукте',
+#                                      related_name='product_parameters', blank=True,
+#                                      on_delete=models.CASCADE)
+#     parameter = models.ForeignKey(Parameter, verbose_name='Параметр', related_name='product_parameters', blank=True,
+#                                   on_delete=models.CASCADE)
+#     value = models.CharField(verbose_name='Значение', max_length=100)
+#
+#     class Meta:
+#         verbose_name = 'Параметр'
+#         verbose_name_plural = "Список параметров"
+#         constraints = [
+#             models.UniqueConstraint(fields=['product_info', 'parameter'], name='unique_product_parameter'),
+#         ]
 
 
 class Contact(models.Model):
@@ -259,40 +259,40 @@ class OrderItem(models.Model):
         ]
 
 
-class ConfirmEmailToken(models.Model):
-    class Meta:
-        verbose_name = 'Токен подтверждения Email'
-        verbose_name_plural = 'Токены подтверждения Email'
-
-    @staticmethod
-    def generate_key():
-        """ generates a pseudo random code using os.urandom and binascii.hexlify """
-        return get_token_generator().generate_token()
-
-    user = models.ForeignKey(
-        User,
-        related_name='confirm_email_tokens',
-        on_delete=models.CASCADE,
-        verbose_name=_("The User which is associated to this password reset token")
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_("When was this token generated")
-    )
-
-    # Key field, though it is not the primary key of the model
-    key = models.CharField(
-        _("Key"),
-        max_length=64,
-        db_index=True,
-        unique=True
-    )
-
-    def save(self, *args, **kwargs):
-        if not self.key:
-            self.key = self.generate_key()
-        return super(ConfirmEmailToken, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return "Password reset token for user {user}".format(user=self.user)
+# class ConfirmEmailToken(models.Model):
+#     class Meta:
+#         verbose_name = 'Токен подтверждения Email'
+#         verbose_name_plural = 'Токены подтверждения Email'
+#
+#     @staticmethod
+#     def generate_key():
+#         """ generates a pseudo random code using os.urandom and binascii.hexlify """
+#         return get_token_generator().generate_token()
+#
+#     user = models.ForeignKey(
+#         User,
+#         related_name='confirm_email_tokens',
+#         on_delete=models.CASCADE,
+#         verbose_name=_("The User which is associated to this password reset token")
+#     )
+#
+#     created_at = models.DateTimeField(
+#         auto_now_add=True,
+#         verbose_name=_("When was this token generated")
+#     )
+#
+#     # Key field, though it is not the primary key of the model
+#     key = models.CharField(
+#         _("Key"),
+#         max_length=64,
+#         db_index=True,
+#         unique=True
+#     )
+#
+#     def save(self, *args, **kwargs):
+#         if not self.key:
+#             self.key = self.generate_key()
+#         return super(ConfirmEmailToken, self).save(*args, **kwargs)
+#
+#     def __str__(self):
+#         return "Password reset token for user {user}".format(user=self.user)
