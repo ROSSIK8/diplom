@@ -3,9 +3,14 @@ from .models import User, Shop, Product, ProductInfo, Contact, Category
 
 
 class ContactSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Contact
-        fields = ['city', 'street', 'house', 'apartment', 'phone']
+        fields = ['id', 'user', 'city', 'street', 'phone']
+        read_only_fields = ['id']
+        extra_kwargs = {
+            'user': {'write_only': True}
+        }
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -35,14 +40,23 @@ class ShopSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    shops = serializers.StringRelatedField(many=True)
+    shops = ShopSerializer(many=True)
 
     class Meta:
         model = Category
-        fields = ['name', 'shops']
+        fields = ['id', 'name', 'shops']
 
 
 class ProductInfoSerializer(serializers.ModelSerializer):
+    product = serializers.StringRelatedField()
+    shop = serializers.StringRelatedField()
+
+    class Meta:
+        model = ProductInfo
+        fields = ['product', 'shop', 'quantity', 'price', 'price_rrc']
+
+
+class ProductInfoForShopSerializer(serializers.ModelSerializer):
     product = serializers.StringRelatedField()
 
     class Meta:
@@ -51,7 +65,7 @@ class ProductInfoSerializer(serializers.ModelSerializer):
 
 
 class ShopDetailSerializer(serializers.ModelSerializer):
-    product_infos = ProductInfoSerializer(many=True, read_only=True)
+    product_infos = ProductInfoForShopSerializer(many=True, read_only=True)
     owner = serializers.StringRelatedField()
 
     class Meta:
@@ -60,11 +74,10 @@ class ShopDetailSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    product_infos = ProductInfoSerializer(many=True, read_only=True)
     category = serializers.StringRelatedField()
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'category', 'product_infos']
+        fields = ['id', 'name', 'category']
 
 

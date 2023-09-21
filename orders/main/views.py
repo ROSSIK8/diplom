@@ -1,13 +1,14 @@
 from django.contrib.auth.password_validation import validate_password
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
+from django.core.exceptions import ObjectDoesNotExist
 
-from .models import User, Shop, Category, Product, ProductInfo
+from .models import User, Shop, Category, Product, ProductInfo, Contact
 from .permissions import IsOwnerOrReadOnly, IsSalesmanOrReadOnly
 from .serializers import UserSerializer, ShopSerializer, ShopDetailSerializer, CategorySerializer, ProductSerializer, \
-    ProductInfoSerializer
+    ProductInfoSerializer, ContactSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
@@ -78,16 +79,70 @@ class CategoryView(ListAPIView):
     serializer_class = CategorySerializer
 
 
-class ProductView(ListAPIView):
+class ProductView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 
 class ProductInfoView(ListAPIView):
-    queryset = ProductInfo.objects.all()
     serializer_class = ProductInfoSerializer
 
+    def get_queryset(self):
+        queryset = ProductInfo.objects.all()
+        try:
+            product = Product.objects.get(name=self.request.query_params.get('title'))
+            queryset = queryset.filter(product=product)
+            return queryset
+        except ObjectDoesNotExist:
+            raise Http404
 
 
+class ContactView(APIView):
 
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
+        contact = Contact.objects.filter(user_id=request.user.id)
+        serializer = ContactSerializer(contact, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+
+        if {'city', 'street', 'phone'}.issubset(request.data):
+            request.data['user'] = request.user.id
+            contact_serializer = ContactSerializer(data=request.data)
+
+            if contact_serializer.is_valid():
+                contact_serializer.save()
+                return JsonResponse({'Status': True})
+            else:
+                return JsonResponse({'Status': False, 'Errors': contact_serializer.errors})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+    def delete(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+
+        Contact.objects.filter(user=request.user).delete()
+        return JsonResponse({'Status': 'deleted'})
+
+    def put(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+
+        if 'id' in request.data:
+            contact = Contact.objects.filter(id=request.data['id'], user_id=request.user.id).first()
+            print(contact)
+            if contact:
+                serializer = ContactSerializer(contact, data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return JsonResponse({'Status': True})
+                else:
+                    return JsonResponse({'Status': False, 'Errors': serializer.errors})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})

@@ -13,9 +13,11 @@ class IsOwnerOrReadOnly(BasePermission):
 class IsSalesmanOrReadOnly(BasePermission):
 
     def has_permission(self, request, view):
-        if request.method == 'POST' and request.user.type == 'salesman':
-            return True
         if request.method in SAFE_METHODS:
+            return True
+        if not request.user.is_authenticated:
+            return False
+        if request.method == 'POST' and request.user.type == 'salesman':
             return True
 
 
