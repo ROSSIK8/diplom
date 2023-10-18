@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Shop, Product, ProductInfo, Contact, Category
+from .models import User, Shop, Product, ProductInfo, Contact, Category, Basket, Order, EmailConfirmation
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -13,18 +13,45 @@ class ContactSerializer(serializers.ModelSerializer):
         }
 
 
+class OrderSerializer(serializers.ModelSerializer):
+    shop = serializers.StringRelatedField()
+
+    class Meta:
+        model = Order
+        fields = ['id', 'shop', 'product', 'quantity']
+
+
+class BasketSerializer(serializers.ModelSerializer):
+    orders = OrderSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Basket
+        fields = ['id', 'orders']
+
+
 class UserSerializer(serializers.ModelSerializer):
     contacts = ContactSerializer(read_only=True, many=True)
     password = serializers.CharField(min_length=8, max_length=65, write_only=True)
 
+    # def create(self, validated_data):
+    #     print(validated_data)
+    #
+    #     return User.objects.create(**validated_data)
+
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'type', 'company', 'position', 'contacts', 'password']
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'type']
+
+
+class EmailConfirmationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = EmailConfirmation
+        fields = ['code']
 
 
 class ShopSerializer(serializers.ModelSerializer):
-    # owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     owner = serializers.StringRelatedField()
 
     def validate(self, data):
@@ -70,7 +97,10 @@ class ShopDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Shop
-        fields = ['id', 'name', 'owner', 'product_infos']
+        fields = ['id', 'name', 'owner', 'product_infos', 'url']
+        extra_kwargs = {
+            'url': {'write_only': True}
+        }
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -79,5 +109,13 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'name', 'category']
+
+
+
+
+
+
+
+
 
 

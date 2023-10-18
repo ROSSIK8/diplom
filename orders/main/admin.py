@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Shop, Product, ProductInfo, ShopCategory, Contact
+from .models import User, Shop, Product, ProductInfo, ShopCategory, Contact, Basket, Order, EmailConfirmation
 
 
 @admin.register(User)
@@ -31,4 +31,18 @@ class CategoryAdmin(admin.ModelAdmin):
 class ContactAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'city', 'street', 'phone']
 
+
+@admin.register(Basket)
+class BasketAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user']
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'shop', 'product', 'quantity']
+
+
+@admin.register(EmailConfirmation)
+class EmailConfirmationAdmin(admin.ModelAdmin):
+    list_display = ['id', 'email', 'code', 'state']
 
