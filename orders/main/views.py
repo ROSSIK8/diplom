@@ -169,7 +169,6 @@ class ContactView(APIView):
 
     "View для работы с контактами"
 
-
     def get(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
@@ -200,7 +199,6 @@ class ContactView(APIView):
 
         if 'id' in request.data:
             contact = Contact.objects.filter(id=request.data['id'], user_id=request.user.id).first()
-            print(contact)
             if contact:
                 serializer = ContactSerializer(contact, data=request.data)
                 if serializer.is_valid():

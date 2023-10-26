@@ -8,7 +8,6 @@ urlpatterns = [
     path('user/register', RegisterView.as_view(), name='user-register'),
     path('user/login', LoginAccount.as_view(), name='user-login'),
     path('user/logout', LogoutAccount.as_view(), name='user-logout'),
-    # path('user/auth/', include('rest_framework.urls'), name='user-login'),
     path('email/confirmation', EmailConfirmationView.as_view(), name='email-confirmation'),
     path('shops/', ShopsView.as_view()),
     path('shop/<int:pk>', ShopDetailView.as_view()),

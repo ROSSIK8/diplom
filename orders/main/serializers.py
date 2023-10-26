@@ -33,11 +33,6 @@ class UserSerializer(serializers.ModelSerializer):
     contacts = ContactSerializer(read_only=True, many=True)
     password = serializers.CharField(min_length=8, max_length=65, write_only=True)
 
-    # def create(self, validated_data):
-    #     print(validated_data)
-    #
-    #     return User.objects.create(**validated_data)
-
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'type', 'company', 'position', 'contacts', 'password']
