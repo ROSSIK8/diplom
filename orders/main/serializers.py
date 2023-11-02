@@ -47,10 +47,10 @@ class EmailConfirmationSerializer(serializers.ModelSerializer):
 
 
 class ShopSerializer(serializers.ModelSerializer):
-    owner = serializers.StringRelatedField()
+    user = serializers.StringRelatedField()
 
     def validate(self, data):
-        data['owner'] = self.context['request'].user
+        data['user'] = self.context['request'].user
         return data
 
     def create(self, validated_data):
@@ -58,7 +58,7 @@ class ShopSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Shop
-        fields = ['id', 'name', 'owner', 'url']
+        fields = ['id', 'name', 'user', 'url']
 
 
 class CategorySerializer(serializers.ModelSerializer):

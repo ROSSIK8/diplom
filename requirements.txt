@@ -8,3 +8,5 @@ django-rest-auth
 django-allauth
 django_rest_passwordreset
 django_filter
+pytest-django
+pytest-cov

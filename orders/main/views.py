@@ -120,12 +120,12 @@ class UserDetailView(RetrieveUpdateDestroyAPIView):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsOwnerOrReadOnly]
 
 
 class ShopsView(ListCreateAPIView):
 
-    "View для просмотра магазинов"
+    "View для просмотра и создания магазинов"
 
     queryset = Shop.objects.all()
     serializer_class = ShopSerializer

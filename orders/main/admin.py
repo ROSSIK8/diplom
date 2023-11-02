@@ -9,7 +9,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'owner', 'categories']
+    list_display = ['id', 'name', 'user', 'categories']
 
 
 @admin.register(Product)

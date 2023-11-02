@@ -82,7 +82,7 @@ class User(AbstractUser):
     type = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE_CHOICES, max_length=8, default='buyer')
 
     def __str__(self):
-        return self.username
+        return self.email
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -93,12 +93,10 @@ class User(AbstractUser):
 class Shop(models.Model):
     name = models.CharField(max_length=50, verbose_name='Название')
     url = models.URLField(verbose_name='Ссылка', null=True, blank=True)
-    owner = models.OneToOneField(User, verbose_name='Владелец',
+    user = models.OneToOneField(User, verbose_name='Владелец',
                                 blank=True, null=True,
                                 on_delete=models.CASCADE)
-    state = models.BooleanField(verbose_name='статус получения заказов', default=True)
 
-    # filename
 
     class Meta:
         verbose_name = 'Магазин'
@@ -130,7 +128,7 @@ class ShopCategory(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=80, verbose_name='Название')
     category = models.ForeignKey(Category, verbose_name='Категория', related_name='products', blank=True,
-                                 on_delete=models.CASCADE)
+                                 on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = 'Продукт'

@@ -162,6 +162,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '50/min',
         'user': '200/min'
-    }
+    },
+    'TEST_REQUEST_FORMAT_JSON': 'json'
 }
 

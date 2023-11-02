@@ -6,8 +6,10 @@ class IsOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
-        if request.user == obj.owner:
-            return True
+        try:
+            return request.user == obj.user
+        except AttributeError:
+            return request.user.email == obj.email
 
 
 class IsSalesmanOrReadOnly(BasePermission):
@@ -17,7 +19,6 @@ class IsSalesmanOrReadOnly(BasePermission):
             return True
         if not request.user.is_authenticated:
             return False
-        if request.method == 'POST' and request.user.type == 'salesman':
-            return True
+        return request.method == 'POST' and request.user.type == 'salesman'
 
 
