@@ -116,7 +116,7 @@ class UsersView(ListAPIView):
 
 class UserDetailView(RetrieveUpdateDestroyAPIView):
 
-    "View для просмотра пользователя"
+    "View для работы с пользователем"
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -134,7 +134,7 @@ class ShopsView(ListCreateAPIView):
 
 class ShopDetailView(RetrieveUpdateDestroyAPIView):
 
-    "View для просмотра магазина"
+    "View для работы с магазином"
 
     queryset = Shop.objects.all()
     serializer_class = ShopDetailSerializer

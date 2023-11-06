@@ -1,9 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from main.models import User
-from main.models import Shop
-from main.models import Product
-from main.models import Category
+from main.models import User, Shop, Product, ProductInfo
 
 
 @pytest.fixture()
@@ -22,10 +19,15 @@ def shop():
     return Shop.objects.create(name='name', url='url')
 
 
-# @pytest.fixture()
-# def product():
-#     category = Category.objects.create
-#     return Product.objects.create(name='name', url='url')
+@pytest.fixture()
+def product(shop):
+    product = Product.objects.create(name='product')
+    external_id = 10
+    quantity = 10
+    price = 10
+    price_rrc = 15
+    return ProductInfo.objects.create(product=product, external_id=external_id, quantity=quantity,
+                               shop=shop, price=price, price_rrc=price_rrc)
 
 
 @pytest.mark.django_db
@@ -60,6 +62,7 @@ def test_get_user(client, user):
 def test_get_shop(client, shop):
     response_get = client.get('http://127.0.0.1:8000/api/v1/shops/')
     assert response_get.status_code == 200
+
     data = response_get.json()
     assert len(data) == 1
 
@@ -72,7 +75,26 @@ def test_get_shop(client, shop):
 
 @pytest.mark.django_db
 def test_get_product(client, product):
-    pass
+    response_get = client.get(f'http://127.0.0.1:8000/api/v1/product?title={product.product}')
+    assert len(ProductInfo.objects.all()) == 1
+
+    assert response_get.status_code == 200
+    data = response_get.json()
+    assert product.product.name == data[0]['product']
+
+
+# @pytest.mark.django_db
+# def test_post_contact(client, user):
+#     user.is_authenticated
+#     data_ = {
+#         'user': user,
+#         'city': 'city',
+#         'street': 'street',
+#         'phone': 'phone'
+#     }
+#     response_post = client.post('http://127.0.0.1:8000/api/v1/contact', data=data_)
+#
+#     assert response_post.status_code == 201
 
 
 
