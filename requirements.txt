@@ -10,3 +10,5 @@ django_rest_passwordreset
 django_filter
 pytest-django
 pytest-cov
+celery
+redis
