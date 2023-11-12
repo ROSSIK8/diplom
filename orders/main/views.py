@@ -1,25 +1,20 @@
-import time
+import random
 
 from django.contrib.auth.password_validation import validate_password
-from django.http import JsonResponse, Http404, HttpResponse
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth import authenticate
-from django.conf import settings
 from django.core.mail import send_mail
-
+from django.http import JsonResponse, Http404
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
-
 from .models import User, Shop, Category, Product, ProductInfo, Contact, Basket, Order, EmailConfirmation
 from .permissions import IsOwnerOrReadOnly, IsSalesmanOrReadOnly
-from .serializers import UserSerializer, ShopSerializer, ShopDetailSerializer, CategorySerializer, ProductSerializer, \
+from .serializers import UserSerializer, ShopSerializer, ShopDetailSerializer, CategorySerializer, \
     ProductInfoSerializer, ContactSerializer, BasketSerializer, OrderSerializer
 from rest_framework.response import Response
-from rest_framework import status
-from .tasks import register_user
-import random
+from .tasks import send_email_code
 
 
 class RegisterView(APIView):
@@ -30,29 +25,26 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # start = time.time()
-        return register_user(self, request)
-        # if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
-        #     try:
-        #         validate_password(request.data['password'])
-        #         user_serializer = UserSerializer(data=request.data)
-        #         if user_serializer.is_valid():
-        #             user_serializer.save()
-        #             if user_serializer.data['type'] == 'buyer':
-        #                 user_id = user_serializer.data['id']
-        #                 Basket.objects.create(user_id=user_id)
-        #                 print(time.time() - start)
-        #                 return Response(user_serializer.data, status=status.HTTP_201_CREATED)
-        #             return Response(user_serializer.data, status=status.HTTP_400_BAD_REQUEST)
-        #         else:
-        #             return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
-        #     except Exception as password_error:
-        #         error_array = []
-        #         # noinspection PyTypeChecker
-        #         for item in password_error:
-        #             error_array.append(item)
-        #         return JsonResponse({'Status': False, 'Errors': {'password': error_array}})
-        # return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
+            try:
+                validate_password(request.data['password'])
+                user_serializer = UserSerializer(data=request.data)
+                if user_serializer.is_valid():
+                    user_serializer.save()
+                    if user_serializer.data['type'] == 'buyer':
+                        user_id = user_serializer.data['id']
+                        Basket.objects.create(user_id=user_id)
+                        return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+                    return Response(user_serializer.data, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
+            except Exception as password_error:
+                error_array = []
+                # noinspection PyTypeChecker
+                for item in password_error:
+                    error_array.append(item)
+                return JsonResponse({'Status': False, 'Errors': {'password': error_array}})
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 
 class EmailConfirmationView(APIView):
@@ -63,9 +55,10 @@ class EmailConfirmationView(APIView):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
         code = random.randint(111111, 999999)
-        send_mail('Код подтверждения', f'{code}', settings.EMAIL_HOST_USER, [request.user.email])
-        EmailConfirmation.objects.create(user_id=request.user.id, email=request.user.email, code=code)
-
+        # from django.conf import settings
+        # send_mail('Код подтверждения', f'{code}', settings.EMAIL_HOST_USER, [request.user.email])
+        # EmailConfirmation.objects.create(user_id=request.user.id, email=request.user.email, code=code)
+        send_email_code.delay(user_id=request.user.id, email=request.user.email, code=code)
         return Response({'text': 'Введите код для подтверждения'})
 
     def post(self, request):
@@ -88,6 +81,7 @@ class LoginAccount(APIView):
 
         if {'email', 'password'}.issubset(request.data):
             user = User.objects.filter(email=request.data['email'], password=request.data['password'])[0]
+            print(user)
 
             if user is not None:
                 if user.is_active:
