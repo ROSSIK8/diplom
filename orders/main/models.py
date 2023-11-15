@@ -53,6 +53,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+
+    "Класс для управления Пользователями"
+
     REQUIRED_FIELDS = []
     objects = UserManager()
     USERNAME_FIELD = 'email'
@@ -91,6 +94,9 @@ class User(AbstractUser):
 
 
 class Shop(models.Model):
+
+    "Класс для управления Магазинами"
+
     name = models.CharField(max_length=50, verbose_name='Название')
     url = models.URLField(verbose_name='Ссылка', null=True, blank=True)
     user = models.OneToOneField(User, verbose_name='Владелец',
@@ -108,6 +114,9 @@ class Shop(models.Model):
 
 
 class Category(models.Model):
+
+    "Класс для управления Категориями товаров и магазинов"
+
     name = models.CharField(max_length=40, verbose_name='Название')
     shops = models.ManyToManyField(Shop, verbose_name='Магазины', related_name='categories', blank=True)
 
@@ -121,11 +130,17 @@ class Category(models.Model):
 
 
 class ShopCategory(models.Model):
+
+    "Класс свзязывающий категории и магазины"
+
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
 
 class Product(models.Model):
+
+    "Класс для управления Товаров"
+
     name = models.CharField(max_length=80, verbose_name='Название')
     category = models.ForeignKey(Category, verbose_name='Категория', related_name='products', blank=True,
                                  on_delete=models.CASCADE, null=True)
@@ -140,6 +155,9 @@ class Product(models.Model):
 
 
 class ProductInfo(models.Model):
+
+    "Класс для информации товаров"
+
     external_id = models.PositiveIntegerField(verbose_name='Внешний ИД')
     product = models.ForeignKey(Product, verbose_name='Продукт', related_name='product_infos', blank=True,
                                 on_delete=models.CASCADE)
@@ -161,6 +179,9 @@ class ProductInfo(models.Model):
 
 
 class Contact(models.Model):
+
+    "Класс для управления Котактами пользователя"
+
     user = models.ForeignKey(User, verbose_name='Пользователь',
                              related_name='contacts', blank=True, null=True,
                              on_delete=models.CASCADE)
@@ -183,13 +204,13 @@ class Contact(models.Model):
 
 
 class Order(models.Model):
+
+    "Класс для управления Заказами"
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='orders', blank=True, null=True)
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, verbose_name='Магазин', related_name='ordered_items', blank=True, null=True)
     product = models.CharField(max_length=255, verbose_name='Продукт', null=True, blank=True)
     quantity = models.PositiveIntegerField(verbose_name='Количество', null=True, blank=True)
-    # product_info = models.ForeignKey(ProductInfo, verbose_name='Информация о продукте', related_name='ordered_items',
-    #                                  blank=True,
-    #                                  on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Заказ'
@@ -197,6 +218,9 @@ class Order(models.Model):
 
 
 class Basket(models.Model):
+
+    "Класс для управления Карзинами"
+
     user = models.ForeignKey(User, verbose_name='Пользователь',
                              related_name='basket', blank=True,
                              on_delete=models.CASCADE, null=True)
@@ -211,6 +235,9 @@ class Basket(models.Model):
 
 
 class EmailConfirmation(models.Model):
+
+    "Класс для подтверждения почты"
+
     user = models.ForeignKey(User, verbose_name='Пользователь',
                              on_delete=models.CASCADE, blank=True, null=True)
     email = models.EmailField(blank=True)

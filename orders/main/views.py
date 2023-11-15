@@ -25,6 +25,9 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+
+        "Регестрация методом post"
+
         if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
             try:
                 validate_password(request.data['password'])
@@ -52,6 +55,9 @@ class EmailConfirmationView(APIView):
     "View для подтверждения email"
 
     def get(self, request):
+
+        "Получение кода на почту"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
         code = random.randint(111111, 999999)
@@ -63,6 +69,9 @@ class EmailConfirmationView(APIView):
         return Response({'text': 'Введите код для подтверждения'})
 
     def post(self, request):
+
+        "Подтверждение почты"
+
         email_code = EmailConfirmation.objects.filter(user=request.user)[0]
         if {'code'}.issubset(request.data):
             request_code = request.data['code']
@@ -79,6 +88,8 @@ class LoginAccount(APIView):
     "View для входа"
 
     def post(self, request, *args, **kwargs):
+
+        "Вход методом post"
 
         if {'email', 'password'}.issubset(request.data):
             user = User.objects.filter(email=request.data['email'], password=request.data['password'])[0]
@@ -100,6 +111,9 @@ class LogoutAccount(APIView):
     "View для выхода"
 
     def delete(self, request):
+
+        "Вход методом delete"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
         Token.objects.get(user=request.user).delete()
@@ -171,6 +185,9 @@ class ContactView(APIView):
     "View для работы с контактами"
 
     def get(self, request):
+
+        "Вывод контактов"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
 
@@ -179,6 +196,9 @@ class ContactView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+
+        "Создание контактов"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
 
@@ -195,6 +215,9 @@ class ContactView(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
     def put(self, request):
+
+        "Обновление контактов"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
 
@@ -211,6 +234,9 @@ class ContactView(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
     def delete(self, request):
+
+        "Удаление контактов"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
 
@@ -223,6 +249,9 @@ class BasketView(APIView):
     "View для просмотра корзины"
 
     def get(self, request):
+
+        "Просмотр товаров корзины"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
 
@@ -236,6 +265,9 @@ class OrderView(APIView):
     "View для работы с заказами"
 
     def post(self, request):
+
+        "Создание заказов"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
         try:
@@ -249,6 +281,9 @@ class OrderView(APIView):
             return JsonResponse({'Status': False, 'Error': 'Неверный запрос'}, status=400)
 
     def put(self, request):
+
+        "Обновление заказов"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
 
@@ -265,6 +300,9 @@ class OrderView(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
     def delete(self, request):
+
+        "Удаление заказов"
+
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется войти'}, status=403)
 
