@@ -51,6 +51,8 @@ INSTALLED_APPS = [
 
     'main',
     'django.contrib.sites',
+
+    'drf_spectacular'
 ]
 
 SITE_ID = 1
@@ -169,6 +171,7 @@ REST_FRAMEWORK = {
         'anon': '50/min',
         'user': '200/min'
     },
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'TEST_REQUEST_FORMAT_JSON': 'json'
 }
 

@@ -12,4 +12,5 @@ pytest-django
 pytest-cov
 celery
 redis
+drf-spectacular
 
