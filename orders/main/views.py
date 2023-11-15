@@ -59,6 +59,7 @@ class EmailConfirmationView(APIView):
         # send_mail('Код подтверждения', f'{code}', settings.EMAIL_HOST_USER, [request.user.email])
         # EmailConfirmation.objects.create(user_id=request.user.id, email=request.user.email, code=code)
         send_email_code.delay(user_id=request.user.id, email=request.user.email, code=code)
+        # send_email_code.apply_async(args=[request.user.id, request.user.email, code])
         return Response({'text': 'Введите код для подтверждения'})
 
     def post(self, request):

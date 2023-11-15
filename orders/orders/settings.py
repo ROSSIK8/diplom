@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 from __future__ import absolute_import
 import os
+import random
+
 from dotenv import load_dotenv
 
 
@@ -151,8 +153,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
-
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'
 
 STATIC_URL = '/static/'
 
